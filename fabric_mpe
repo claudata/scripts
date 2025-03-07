@@ -1,0 +1,35 @@
+$tenantId = ""
+$clientId = ""
+$clientSecret = ""
+$scope = "https://api.fabric.microsoft.com/.default"
+
+$body = @{
+    client_id     = $clientId
+    client_secret = $clientSecret
+    scope         = $scope
+    grant_type    = "client_credentials"
+}
+
+$tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$tenantId/oauth2/v2.0/token" -Method Post -Body $body
+$accessToken = $tokenResponse.access_token
+
+#$accessToken = ""
+
+$workspaceId = ""
+
+# List Managed Private Endpoints
+$listApiUrl = "https://api.fabric.microsoft.com/v1/workspaces/$workspaceId/managedPrivateEndpoints/"
+
+$headers = @{
+    "Authorization" = "Bearer $accessToken"
+    "Content-Type" = "application/json"
+}
+
+$listResponse = Invoke-RestMethod -Uri $listApiUrl -Method Get -Headers $headers
+
+if ($listResponse -ne $null) {
+    Write-Output "Managed private endpoints listed successfully"
+    $listResponse | ConvertTo-Json -Depth 3
+} else {
+    Write-Output "Failed to list managed private endpoints"
+}
